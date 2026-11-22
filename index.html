@@ -735,6 +735,17 @@
         grid-row: 2 / 4;
         align-self: center;
       }
+
+      /* On small screens keep each file row focused on name, status, and action. */
+      .batch-item > div:nth-child(2),
+      .batch-item > div:nth-child(3) {
+        display: none;
+      }
+
+      .batch-item .status {
+        grid-column: 1;
+        grid-row: 2;
+      }
     }
 
     .spinner {
@@ -1003,10 +1014,8 @@
     <div class="tab-panel active" id="tab-webp" role="tabpanel">
       <section class="panel">
         <div class="mode-switch" role="tablist" aria-label="حالت تبدیل WebP">
-          <button type="button" class="active" id="modeSingleBtn" data-mode="single" aria-pressed="true">تک‌فایل (با
-            پیش‌نمایش)</button>
-          <button type="button" id="modeBatchBtn" data-mode="batch" aria-pressed="false">چندفایل (بدون
-            پیش‌نمایش)</button>
+          <button type="button" class="active" id="modeSingleBtn" data-mode="single" aria-pressed="true">تک‌فایل</button>
+          <button type="button" id="modeBatchBtn" data-mode="batch" aria-pressed="false">چندفایل</button>
         </div>
 
         <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="انتخاب یا رها کردن تصویر">
@@ -2359,9 +2368,6 @@
 
         fileInput.value = "";
 
-        if (added) {
-          await convertBatch(true);
-        }
       }
 
       async function handleFile(file) {
