@@ -1,0 +1,3423 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>n4n-tools — تبدیل WebP، کراپ و پسورد | آفلاین</title>
+  <meta name="description"
+    content="ابزارهای کاملاً آفلاین در مرورگر: تبدیل گروهی به WebP، کراپ تصویر و تولید پسورد امن. فایل‌ها از دستگاه شما خارج نمی‌شوند." />
+  <meta name="keywords" content="webp, image converter, crop, password generator, offline, تبدیل تصویر, کراپ, پسورد" />
+  <meta name="theme-color" content="#0f1419" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="./" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180" />
+  <link rel="manifest" href="manifest.webmanifest" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="fa_IR" />
+  <meta property="og:title" content="n4n-tools — تبدیل WebP، کراپ و پسورد" />
+  <meta property="og:description"
+    content="کاملاً آفلاین در مرورگر: تبدیل چندتایی به WebP، کراپ تصویر و تولید پسورد. حریم خصوصی حفظ می‌شود." />
+  <meta property="og:image" content="assets/og-cover.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="n4n-tools — تبدیل WebP، کراپ و پسورد" />
+  <meta name="twitter:description" content="ابزارهای آفلاین مرورگر برای WebP، کراپ و پسورد." />
+  <meta name="twitter:image" content="assets/og-cover.png" />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --bg-elevated: #1a222d;
+      --bg-hover: #243040;
+      --border: #2e3a4a;
+      --text: #e8eef4;
+      --text-muted: #8b9aab;
+      --accent: #3d9a78;
+      --accent-hover: #4db38c;
+      --accent-dim: rgba(61, 154, 120, 0.15);
+      --danger: #d45b5b;
+      --danger-dim: rgba(212, 91, 91, 0.12);
+      --warn: #c9a227;
+      --radius: 10px;
+      --font: "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(61, 154, 120, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 90% 10%, rgba(70, 120, 180, 0.08), transparent),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+
+    header {
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+      font-size: 0.95rem;
+    }
+
+    .panel {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      background: transparent;
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .dropzone.has-file {
+      border-style: solid;
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      padding: 1.25rem;
+    }
+
+    .dropzone .icon {
+      font-size: 2.25rem;
+      margin-bottom: 0.75rem;
+      opacity: 0.7;
+    }
+
+    .dropzone h2 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+
+    .dropzone p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .dropzone .file-name {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.95rem;
+      word-break: break-all;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .controls {
+      display: grid;
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+    }
+
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .quality-block {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .quality-block label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .quality-block label span.value {
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .dims-block {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 0.65rem;
+      width: 100%;
+    }
+
+    .dims-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 100px;
+    }
+
+    .dims-field label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .dims-field input {
+      width: 110px;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .dims-field input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-dim);
+    }
+
+    .dims-field input:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .dims-lock {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      user-select: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .dims-lock:hover:not(:disabled) {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .dims-lock.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .dims-lock:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .dims-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      width: 100%;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border);
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.7rem 1.35rem;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s, transform 0.1s;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0a1210;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--bg-hover);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #2c3a4c;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .alert {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .alert.visible {
+      display: block;
+    }
+
+    .alert-error {
+      background: var(--danger-dim);
+      border: 1px solid var(--danger);
+      color: #f0b0b0;
+    }
+
+    .alert-warn {
+      background: rgba(201, 162, 39, 0.12);
+      border: 1px solid var(--warn);
+      color: #e8d48a;
+    }
+
+    .alert-info {
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      color: #a8dcc8;
+    }
+
+    .workspace {
+      display: none;
+      margin-top: 1.5rem;
+    }
+
+    .workspace.visible {
+      display: block;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .stat {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+    }
+
+    .stat .label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: none;
+      margin-bottom: 0.2rem;
+    }
+
+    .stat .val {
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat .val.good {
+      color: var(--accent);
+    }
+
+    .stat .val.bad {
+      color: var(--danger);
+    }
+
+    .previews {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 720px) {
+      .previews {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .preview-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .preview-card.is-before {
+      border-color: #4a5568;
+    }
+
+    .preview-card.is-after {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(61, 154, 120, 0.25);
+    }
+
+    .preview-card .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .preview-card.is-before .head {
+      background: #1e2530;
+    }
+
+    .preview-card.is-after .head {
+      background: rgba(61, 154, 120, 0.12);
+    }
+
+    .preview-card .head .title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-before {
+      background: #3d4654;
+      color: #c5ced9;
+    }
+
+    .badge-after {
+      background: var(--accent);
+      color: #0a1210;
+    }
+
+    .preview-card .head .meta {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 0.8rem;
+      text-align: left;
+    }
+
+    .preview-frame {
+      flex: 1;
+      min-height: 220px;
+      max-height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        repeating-conic-gradient(#1e2834 0% 25%, #161d26 0% 50%) 50% / 16px 16px;
+      padding: 0.75rem;
+      overflow: auto;
+    }
+
+    .preview-frame img {
+      max-width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .preview-frame .placeholder {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .formats {
+      margin-top: 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-align: center;
+    }
+
+    .mode-switch {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.15rem;
+      padding: 0.35rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .mode-switch button {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.55rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .mode-switch button:hover {
+      color: var(--text);
+      background: var(--bg-hover);
+    }
+
+    .mode-switch button.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .batch-options {
+      display: none;
+      width: 100%;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .batch-options.visible {
+      display: flex;
+    }
+
+    .option-group {
+      flex: 1;
+      min-width: 220px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+    }
+
+    .option-group .opt-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.55rem;
+    }
+
+    .option-group label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      cursor: pointer;
+      margin-bottom: 0.4rem;
+      line-height: 1.45;
+    }
+
+    .option-group label:last-child {
+      margin-bottom: 0;
+    }
+
+    .option-group input[type="radio"] {
+      margin-top: 0.2rem;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .batch-workspace {
+      display: none;
+      margin-top: 1.5rem;
+    }
+
+    .batch-workspace.visible {
+      display: block;
+    }
+
+    .batch-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .batch-summary .stat {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .batch-list {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .batch-list-head,
+    .batch-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) 0.7fr 0.7fr 0.8fr auto;
+      gap: 0.65rem;
+      align-items: center;
+      padding: 0.7rem 0.9rem;
+      font-size: 0.85rem;
+    }
+
+    .batch-list-head {
+      background: #1e2530;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .batch-item {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .batch-item:last-child {
+      border-bottom: none;
+    }
+
+    .batch-item .name {
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .batch-item .out-name {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 0.78rem;
+      display: block;
+      margin-top: 0.15rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .batch-item .status {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .batch-item .status.ok {
+      color: var(--accent);
+    }
+
+    .batch-item .status.err {
+      color: var(--danger);
+    }
+
+    .batch-item .status.pending {
+      color: var(--text-muted);
+    }
+
+    .batch-item .status.busy {
+      color: var(--warn);
+    }
+
+    .batch-item .btn {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    .batch-empty {
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 720px) {
+      .batch-list-head {
+        display: none;
+      }
+
+      .batch-item {
+        grid-template-columns: 1fr auto;
+        gap: 0.4rem 0.75rem;
+      }
+
+      .batch-item .name {
+        grid-column: 1 / -1;
+      }
+
+      .batch-item .btn {
+        grid-column: 2;
+        grid-row: 2 / 4;
+        align-self: center;
+      }
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.25rem;
+      padding: 0.35rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .dims-inline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem 0.65rem;
+      width: 100%;
+    }
+
+    .dims-inline .dims-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .dims-inline .dims-sep {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 1.1rem;
+      user-select: none;
+    }
+
+    .dims-inline .dims-unit {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-inline-end: 0.25rem;
+    }
+
+    .dims-inline input[type="number"] {
+      width: 96px;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+      direction: ltr;
+    }
+
+    .dims-inline input[type="number"]:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-dim);
+    }
+
+    .dims-inline input[type="number"]:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 140px;
+      padding: 0.7rem 1rem;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      text-align: center;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: var(--bg-hover);
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #0a1210;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .tab-panel>.panel:first-child {
+      margin-top: 0;
+    }
+
+    #cropFileInput {
+      display: none;
+    }
+
+    .crop-stage-wrap {
+      display: none;
+      margin-top: 1.25rem;
+    }
+
+    .crop-stage-wrap.visible {
+      display: block;
+    }
+
+    .crop-stage {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      line-height: 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #111820;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .crop-stage img {
+      display: block;
+      max-width: 100%;
+      max-height: min(70vh, 640px);
+      width: auto;
+      height: auto;
+      pointer-events: none;
+    }
+
+    .crop-shade {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      pointer-events: none;
+    }
+
+    .crop-box {
+      position: absolute;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+      background: transparent;
+      cursor: grab;
+      box-sizing: border-box;
+      z-index: 2;
+    }
+
+    .crop-box:active {
+      cursor: grabbing;
+    }
+
+    .crop-box::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to right, rgba(255, 255, 255, 0.2) 1px, transparent 1px) 0 0 / 33.333% 100%,
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 1px, transparent 1px) 0 0 / 100% 33.333%;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .crop-box-label {
+      position: absolute;
+      top: 0.35rem;
+      right: 0.35rem;
+      background: var(--accent);
+      color: #0a1210;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      line-height: 1.4;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .crop-preview-row {
+      display: none;
+      margin-top: 1rem;
+      gap: 1rem;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .crop-preview-row.visible {
+      display: flex;
+    }
+
+    .crop-preview-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem;
+      max-width: 100%;
+    }
+
+    .crop-preview-card h3 {
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .crop-preview-card img {
+      display: block;
+      max-width: min(100%, 320px);
+      max-height: 240px;
+      border-radius: 6px;
+      background:
+        repeating-conic-gradient(#1e2834 0% 25%, #161d26 0% 50%) 50% / 12px 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1>n4n-tools</h1>
+      <p>کاملاً آفلاین — فایل‌ها از دستگاه شما خارج نمی‌شوند</p>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="ابزارهای n4n-tools">
+      <a href="#webp" class="tab-btn active" role="tab" aria-selected="true" data-tab="webp">تبدیل به WebP</a>
+      <a href="#crop" class="tab-btn" role="tab" aria-selected="false" data-tab="crop">کراپ تصویر</a>
+      <a href="#password" class="tab-btn" role="tab" aria-selected="false" data-tab="password">تولید پسورد</a>
+    </nav>
+
+    <div class="tab-panel active" id="tab-webp" role="tabpanel">
+      <section class="panel">
+        <div class="mode-switch" role="tablist" aria-label="حالت تبدیل WebP">
+          <button type="button" class="active" id="modeSingleBtn" data-mode="single" aria-pressed="true">تک‌فایل (با
+            پیش‌نمایش)</button>
+          <button type="button" id="modeBatchBtn" data-mode="batch" aria-pressed="false">چندفایل (بدون
+            پیش‌نمایش)</button>
+        </div>
+
+        <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="انتخاب یا رها کردن تصویر">
+          <div class="icon" aria-hidden="true">⬆</div>
+          <h2 id="dropzoneTitle">تصویر را اینجا رها کنید یا کلیک کنید</h2>
+          <p id="dropzoneHint">JPEG، PNG، GIF، BMP، TIFF، SVG، AVIF، HEIC و بیشتر</p>
+        </div>
+        <input type="file" id="fileInput"
+          accept="image/*,.tif,.tiff,.heic,.heif,.avif,.bmp,.gif,.png,.jpg,.jpeg,.webp,.svg,.ico" />
+
+        <div class="controls">
+          <div class="control-row batch-options" id="batchOptions">
+            <div class="option-group">
+              <div class="opt-title">هنگام انتخاب فایل‌های جدید</div>
+              <label>
+                <input type="radio" name="batchAddMode" value="replace" checked />
+                جایگزینی لیست قبلی
+              </label>
+              <label>
+                <input type="radio" name="batchAddMode" value="append" />
+                افزودن جدا به لیست فعلی
+              </label>
+            </div>
+            <div class="option-group">
+              <div class="opt-title">نام فایل خروجی</div>
+              <label>
+                <input type="radio" name="batchNameMode" value="replace" checked />
+                همان نام با پسوند WebP (جایگزینی فرمت)
+              </label>
+              <label>
+                <input type="radio" name="batchNameMode" value="separate" />
+                ساخت جدا با پسوند «-webp»
+              </label>
+            </div>
+          </div>
+          <div class="control-row">
+            <div class="quality-block">
+              <label for="quality">
+                کیفیت WebP
+                <span class="value" id="qualityValue">80</span>
+              </label>
+              <input type="range" id="quality" min="1" max="100" value="80" />
+            </div>
+            <div class="actions">
+              <button type="button" class="btn btn-primary" id="convertBtn" disabled>
+                تبدیل
+              </button>
+              <button type="button" class="btn btn-secondary" id="downloadBtn" disabled>
+                دانلود WebP
+              </button>
+              <button type="button" class="btn btn-secondary" id="downloadAllBtn" disabled style="display:none;">
+                دانلود همه
+              </button>
+              <button type="button" class="btn btn-secondary" id="resetBtn" disabled>
+                پاک کردن
+              </button>
+            </div>
+          </div>
+          <div class="control-row" id="singleDimsRow">
+            <div class="dims-block">
+              <div class="dims-field">
+                <label for="outWidth">عرض (پیکسل)</label>
+                <input type="number" id="outWidth" min="1" max="8192" step="1" disabled placeholder="عرض" />
+              </div>
+              <div class="dims-field">
+                <label for="outHeight">ارتفاع (پیکسل)</label>
+                <input type="number" id="outHeight" min="1" max="8192" step="1" disabled placeholder="ارتفاع" />
+              </div>
+              <button type="button" class="dims-lock active" id="aspectLock" disabled title="قفل نسبت تصویر"
+                aria-pressed="true">
+                🔗 نسبت ثابت
+              </button>
+              <button type="button" class="btn btn-secondary" id="resetDimsBtn" disabled
+                style="padding:0.55rem 0.9rem;font-size:0.85rem;">
+                ابعاد اصلی
+              </button>
+              <p class="dims-hint" id="dimsHint">بعد از انتخاب تصویر می‌توانید عرض و ارتفاع خروجی را مشخص کنید.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-error" id="errorBox" role="alert"></div>
+        <div class="alert alert-warn" id="warnBox" role="status"></div>
+        <div class="alert alert-info" id="infoBox" role="status"></div>
+      </section>
+
+      <section class="workspace" id="workspace">
+        <div class="stats" id="stats">
+          <div class="stat">
+            <div class="label">حجم قبل</div>
+            <div class="val" id="sizeOriginal">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">حجم بعد</div>
+            <div class="val" id="sizeWebp">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">صرفه‌جویی</div>
+            <div class="val" id="sizeSaved">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">ابعاد</div>
+            <div class="val" id="dimensions">—</div>
+          </div>
+        </div>
+
+        <div class="previews">
+          <div class="preview-card is-before">
+            <div class="head">
+              <div class="title-group">
+                <span class="badge badge-before">قبل</span>
+                <span>تصویر قبلی (اصلی)</span>
+              </div>
+              <span class="meta" id="originalMeta"></span>
+            </div>
+            <div class="preview-frame" id="originalFrame">
+              <div class="placeholder">پیش‌نمایش تصویر قبلی</div>
+            </div>
+          </div>
+          <div class="preview-card is-after">
+            <div class="head">
+              <div class="title-group">
+                <span class="badge badge-after">بعد</span>
+                <span>تصویر جدید (WebP)</span>
+              </div>
+              <span class="meta" id="webpMeta"></span>
+            </div>
+            <div class="preview-frame" id="webpFrame">
+              <div class="placeholder">پس از تبدیل اینجا نمایش داده می‌شود</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="batch-workspace" id="batchWorkspace">
+        <div class="batch-summary">
+          <div class="stat">
+            <div class="label">تعداد فایل</div>
+            <div class="val" id="batchCount">۰</div>
+          </div>
+          <div class="stat">
+            <div class="label">حجم قبل</div>
+            <div class="val" id="batchSizeOriginal">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">حجم بعد</div>
+            <div class="val" id="batchSizeWebp">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">تبدیل‌شده</div>
+            <div class="val" id="batchDoneCount">۰</div>
+          </div>
+        </div>
+        <div class="batch-list" id="batchList">
+          <div class="batch-empty" id="batchEmpty">هنوز تصویری انتخاب نشده — چند فایل را یکجا انتخاب کنید.</div>
+        </div>
+      </section>
+
+      <p class="formats">
+        فایل‌ها در پوشه Downloads مرورگر ذخیره می‌شوند. تبدیل کاملاً آفلاین و داخل مرورگر است.
+      </p>
+    </div>
+
+    <div class="tab-panel" id="tab-crop" role="tabpanel">
+      <section class="panel">
+        <div class="dropzone" id="cropDropzone" role="button" tabindex="0"
+          aria-label="انتخاب یا رها کردن تصویر برای کراپ">
+          <div class="icon" aria-hidden="true">⬆</div>
+          <h2>تصویر را برای کراپ رها کنید یا کلیک کنید</h2>
+          <p>ابعاد کادر را وارد کنید، کادر را جابجا کنید، سپس ذخیره کنید</p>
+        </div>
+        <input type="file" id="cropFileInput"
+          accept="image/*,.tif,.tiff,.heic,.heif,.avif,.bmp,.gif,.png,.jpg,.jpeg,.webp,.svg,.ico" />
+
+        <div class="controls">
+          <div class="control-row">
+            <div class="dims-block">
+              <div class="dims-inline" dir="ltr">
+                <span class="dims-label">Dimensions:</span>
+                <input type="number" id="cropWidth" min="1" max="8192" step="1" disabled placeholder="1920" value="1920"
+                  aria-label="Width" />
+                <span class="dims-sep" aria-hidden="true">×</span>
+                <input type="number" id="cropHeight" min="1" max="8192" step="1" disabled placeholder="1080"
+                  value="1080" aria-label="Height" />
+                <span class="dims-unit">px</span>
+                <button type="button" class="dims-lock active" id="cropAspectLock" disabled title="قفل نسبت کادر"
+                  aria-pressed="true">
+                  🔗 نسبت ثابت
+                </button>
+              </div>
+              <div class="actions" style="margin-top:0.35rem;">
+                <button type="button" class="btn btn-primary" id="cropSaveBtn" disabled>ذخیره کراپ</button>
+                <button type="button" class="btn btn-secondary" id="cropResetBtn" disabled>پاک کردن</button>
+              </div>
+              <p class="dims-hint" id="cropHint">بعد از انتخاب تصویر، ابعاد کادر را مشخص کنید و آن را روی تصویر جابجا
+                کنید.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-error" id="cropError" role="alert"></div>
+        <div class="alert alert-info" id="cropInfo" role="status"></div>
+
+        <div class="crop-stage-wrap" id="cropStageWrap">
+          <div class="crop-stage" id="cropStage">
+            <img id="cropImg" alt="تصویر برای کراپ" draggable="false" />
+            <div class="crop-box" id="cropBox" hidden>
+              <span class="crop-box-label" id="cropBoxLabel"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="crop-preview-row" id="cropPreviewRow">
+          <div class="crop-preview-card">
+            <h3>پیش‌نمایش کراپ</h3>
+            <img id="cropPreviewImg" alt="پیش‌نمایش کراپ" />
+          </div>
+        </div>
+      </section>
+      <p class="formats">کادر را با موس یا انگشت جابجا کنید. خروجی با ابعاد واردشده ذخیره می‌شود.</p>
+    </div>
+
+    <div class="tab-panel" id="tab-password" role="tabpanel">
+      <section class="panel" id="passwordSection">
+        <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:1rem;">تولید پسورد تصادفی</h2>
+
+        <div class="pwd-output-wrap">
+          <input type="text" id="pwdOutput" class="pwd-output" value="" readonly placeholder="پسوردی تولید نشده" />
+          <button type="button" class="btn btn-primary pwd-copy-btn" id="pwdCopyBtn" title="کپی">
+            کپی
+          </button>
+        </div>
+
+        <div class="pwd-strength-bar" id="pwdStrengthBar">
+          <div class="pwd-strength-fill" id="pwdStrengthFill"></div>
+        </div>
+        <div class="pwd-strength-label" id="pwdStrengthLabel"></div>
+
+        <div class="pwd-controls">
+          <div class="pwd-control-row">
+            <label for="pwdLength">طول پسورد</label>
+            <div style="display:flex;align-items:center;gap:0.75rem;flex:1;min-width:180px;">
+              <input type="range" id="pwdLength" min="4" max="128" value="16" style="flex:1;" />
+              <span class="pwd-length-val" id="pwdLengthVal">16</span>
+            </div>
+          </div>
+
+          <div class="pwd-options">
+            <label class="pwd-option">
+              <input type="checkbox" id="pwdUpper" checked />
+              حروف بزرگ (A-Z)
+            </label>
+            <label class="pwd-option">
+              <input type="checkbox" id="pwdLower" checked />
+              حروف کوچک (a-z)
+            </label>
+            <label class="pwd-option">
+              <input type="checkbox" id="pwdDigits" checked />
+              اعداد (0-9)
+            </label>
+            <label class="pwd-option">
+              <input type="checkbox" id="pwdSymbols" checked />
+              نمادها (!@#$%…)
+            </label>
+            <label class="pwd-option">
+              <input type="checkbox" id="pwdNoAmbiguous" checked />
+              حذف کاراکترهای مبهم (0Ol1I)
+            </label>
+          </div>
+
+          <div class="pwd-control-row" style="margin-top:0.5rem;">
+            <label for="pwdCount">تعداد</label>
+            <div style="display:flex;align-items:center;gap:0.75rem;flex:1;min-width:120px;">
+              <input type="range" id="pwdCount" min="1" max="20" value="1" style="flex:1;" />
+              <span class="pwd-length-val" id="pwdCountVal">1</span>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;gap:0.6rem;margin-top:0.75rem;">
+            <button type="button" class="btn btn-primary" id="pwdGenerateBtn">تولید</button>
+            <button type="button" class="btn btn-secondary" id="pwdCopyAllBtn" disabled>کپی همه</button>
+          </div>
+        </div>
+
+        <div id="pwdList" class="pwd-list"></div>
+
+        <div class="alert alert-error" id="pwdError" role="alert"></div>
+      </section>
+    </div>
+
+    <footer>بدون سرور · بدون آپلود · بدون وابستگی خارجی</footer>
+  </div>
+
+  <style>
+    .pwd-output-wrap {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .pwd-output {
+      flex: 1;
+      font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+      font-size: 1.1rem;
+      letter-spacing: 0.05em;
+      padding: 0.7rem 0.9rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--accent);
+      outline: none;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .pwd-output:focus {
+      border-color: var(--accent);
+    }
+
+    .pwd-copy-btn {
+      white-space: nowrap;
+      min-width: 60px;
+    }
+
+    .pwd-strength-bar {
+      height: 5px;
+      border-radius: 3px;
+      background: var(--border);
+      overflow: hidden;
+      margin-bottom: 0.3rem;
+    }
+
+    .pwd-strength-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 3px;
+      transition: width 0.3s, background 0.3s;
+    }
+
+    .pwd-strength-label {
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+      min-height: 1.2em;
+    }
+
+    .pwd-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .pwd-control-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .pwd-control-row label {
+      min-width: 80px;
+      font-size: 0.9rem;
+    }
+
+    .pwd-length-val {
+      min-width: 2.2em;
+      text-align: center;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      font-size: 1rem;
+    }
+
+    .pwd-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.25rem;
+    }
+
+    .pwd-option {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .pwd-option input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .pwd-list {
+      margin-top: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .pwd-list-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+      font-size: 0.95rem;
+      direction: ltr;
+      text-align: left;
+      word-break: break-all;
+      color: var(--text);
+    }
+
+    .pwd-list-item .pwd-item-copy {
+      flex-shrink: 0;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 5px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .pwd-list-item .pwd-item-copy:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .pwd-list-item .pwd-text {
+      flex: 1;
+    }
+
+    #pwdError {
+      margin-top: 0.75rem;
+    }
+  </style>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var dropzone = document.getElementById("dropzone");
+      var fileInput = document.getElementById("fileInput");
+      var qualityInput = document.getElementById("quality");
+      var qualityValue = document.getElementById("qualityValue");
+      var convertBtn = document.getElementById("convertBtn");
+      var downloadBtn = document.getElementById("downloadBtn");
+      var downloadAllBtn = document.getElementById("downloadAllBtn");
+      var resetBtn = document.getElementById("resetBtn");
+      var errorBox = document.getElementById("errorBox");
+      var warnBox = document.getElementById("warnBox");
+      var infoBox = document.getElementById("infoBox");
+      var workspace = document.getElementById("workspace");
+      var batchWorkspace = document.getElementById("batchWorkspace");
+      var batchOptions = document.getElementById("batchOptions");
+      var singleDimsRow = document.getElementById("singleDimsRow");
+      var modeSingleBtn = document.getElementById("modeSingleBtn");
+      var modeBatchBtn = document.getElementById("modeBatchBtn");
+      var batchList = document.getElementById("batchList");
+      var batchEmpty = document.getElementById("batchEmpty");
+      var batchCountEl = document.getElementById("batchCount");
+      var batchSizeOriginal = document.getElementById("batchSizeOriginal");
+      var batchSizeWebp = document.getElementById("batchSizeWebp");
+      var batchDoneCount = document.getElementById("batchDoneCount");
+      var sizeOriginal = document.getElementById("sizeOriginal");
+      var sizeWebp = document.getElementById("sizeWebp");
+      var sizeSaved = document.getElementById("sizeSaved");
+      var dimensionsEl = document.getElementById("dimensions");
+      var originalFrame = document.getElementById("originalFrame");
+      var webpFrame = document.getElementById("webpFrame");
+      var originalMeta = document.getElementById("originalMeta");
+      var webpMeta = document.getElementById("webpMeta");
+      var outWidthInput = document.getElementById("outWidth");
+      var outHeightInput = document.getElementById("outHeight");
+      var aspectLockBtn = document.getElementById("aspectLock");
+      var resetDimsBtn = document.getElementById("resetDimsBtn");
+      var dimsHint = document.getElementById("dimsHint");
+
+      var state = {
+        mode: "single",
+        file: null,
+        objectUrl: null,
+        webpBlob: null,
+        webpUrl: null,
+        width: 0,
+        height: 0,
+        outWidth: 0,
+        outHeight: 0,
+        keepAspect: true,
+        syncingDims: false,
+        converting: false,
+        convertTimer: null,
+        batchItems: [],
+        batchIdSeq: 0,
+      };
+
+      var MAX_FILE_BYTES = 80 * 1024 * 1024;
+      var MAX_DIMENSION = 8192;
+      var CONVERT_DEBOUNCE_MS = 280;
+
+      var IMAGE_EXTENSIONS = {
+        jpg: true, jpeg: true, png: true, gif: true, bmp: true,
+        webp: true, svg: true, ico: true, tif: true, tiff: true,
+        avif: true, heic: true, heif: true, jfif: true, apng: true,
+      };
+
+      function formatBytes(bytes) {
+        if (bytes == null || isNaN(bytes)) return "—";
+        if (bytes === 0) return "۰ بایت";
+        var units = ["بایت", "کیلوبایت", "مگابایت", "گیگابایت"];
+        var i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+        var value = bytes / Math.pow(1024, i);
+        var formatted = value < 10 && i > 0
+          ? value.toFixed(2)
+          : value < 100 && i > 0
+            ? value.toFixed(1)
+            : Math.round(value).toString();
+        return toPersianDigits(formatted) + " " + units[i];
+      }
+
+      function toPersianDigits(str) {
+        return String(str).replace(/\d/g, function (d) {
+          return "۰۱۲۳۴۵۶۷۸۹"[d];
+        });
+      }
+
+      function clearAlerts() {
+        errorBox.classList.remove("visible");
+        warnBox.classList.remove("visible");
+        infoBox.classList.remove("visible");
+        errorBox.textContent = "";
+        warnBox.textContent = "";
+        infoBox.textContent = "";
+      }
+
+      function showError(msg) {
+        clearAlerts();
+        errorBox.textContent = msg;
+        errorBox.classList.add("visible");
+      }
+
+      function showWarn(msg) {
+        warnBox.textContent = msg;
+        warnBox.classList.add("visible");
+      }
+
+      function showInfo(msg) {
+        infoBox.textContent = msg;
+        infoBox.classList.add("visible");
+      }
+
+      function revokeUrls() {
+        if (state.objectUrl) {
+          URL.revokeObjectURL(state.objectUrl);
+          state.objectUrl = null;
+        }
+        if (state.webpUrl) {
+          URL.revokeObjectURL(state.webpUrl);
+          state.webpUrl = null;
+        }
+      }
+
+      function resetWebpOutput() {
+        if (state.webpUrl) {
+          URL.revokeObjectURL(state.webpUrl);
+          state.webpUrl = null;
+        }
+        state.webpBlob = null;
+        webpFrame.innerHTML = '<div class="placeholder">پس از تبدیل اینجا نمایش داده می‌شود</div>';
+        webpMeta.textContent = "";
+        sizeWebp.textContent = "—";
+        sizeSaved.textContent = "—";
+        sizeSaved.className = "val";
+        downloadBtn.disabled = true;
+      }
+
+      function getBatchAddMode() {
+        var el = document.querySelector('input[name="batchAddMode"]:checked');
+        return el ? el.value : "replace";
+      }
+
+      function getBatchNameMode() {
+        var el = document.querySelector('input[name="batchNameMode"]:checked');
+        return el ? el.value : "replace";
+      }
+
+      function makeOutputName(fileName, nameMode) {
+        var base = String(fileName).replace(/\.[^.]+$/, "") || "image";
+        if (nameMode === "separate") {
+          return base + "-webp.webp";
+        }
+        return base + ".webp";
+      }
+
+      function revokeBatchUrls() {
+        state.batchItems.forEach(function (item) {
+          if (item.webpUrl) {
+            URL.revokeObjectURL(item.webpUrl);
+            item.webpUrl = null;
+          }
+        });
+      }
+
+      function updateDropzoneIdle() {
+        dropzone.classList.remove("has-file");
+        if (state.mode === "batch") {
+          var count = state.batchItems.length;
+          if (count > 0) {
+            dropzone.classList.add("has-file");
+            dropzone.innerHTML =
+              '<p class="file-name">' +
+              toPersianDigits(count) +
+              " فایل انتخاب شده</p><p>" +
+              (getBatchAddMode() === "append"
+                ? "برای افزودن بیشتر، دوباره کلیک یا رها کنید"
+                : "انتخاب جدید لیست قبلی را جایگزین می‌کند") +
+              "</p>";
+          } else {
+            dropzone.innerHTML =
+              '<div class="icon" aria-hidden="true">⬆</div>' +
+              "<h2>چند تصویر را یکجا انتخاب یا رها کنید</h2>" +
+              "<p>بدون پیش‌نمایش — تبدیل گروهی به WebP</p>";
+          }
+        } else {
+          dropzone.innerHTML =
+            '<div class="icon" aria-hidden="true">⬆</div>' +
+            "<h2>تصویر را اینجا رها کنید یا کلیک کنید</h2>" +
+            "<p>JPEG، PNG، GIF، BMP، TIFF، SVG، AVIF، HEIC و بیشتر</p>";
+        }
+      }
+
+      function setMode(mode) {
+        if (mode !== "single" && mode !== "batch") mode = "single";
+        if (state.mode === mode) return;
+
+        if (state.convertTimer) {
+          clearTimeout(state.convertTimer);
+          state.convertTimer = null;
+        }
+
+        var prevMode = state.mode;
+        state.mode = mode;
+
+        modeSingleBtn.classList.toggle("active", mode === "single");
+        modeBatchBtn.classList.toggle("active", mode === "batch");
+        modeSingleBtn.setAttribute("aria-pressed", mode === "single" ? "true" : "false");
+        modeBatchBtn.setAttribute("aria-pressed", mode === "batch" ? "true" : "false");
+
+        batchOptions.classList.toggle("visible", mode === "batch");
+        singleDimsRow.style.display = mode === "batch" ? "none" : "";
+        downloadBtn.style.display = mode === "batch" ? "none" : "";
+        downloadAllBtn.style.display = mode === "batch" ? "" : "none";
+        fileInput.multiple = mode === "batch";
+
+        if (prevMode === "single") {
+          revokeUrls();
+          state.file = null;
+          state.webpBlob = null;
+          state.width = 0;
+          state.height = 0;
+          state.outWidth = 0;
+          state.outHeight = 0;
+          originalFrame.innerHTML = '<div class="placeholder">پیش‌نمایش تصویر قبلی</div>';
+          originalMeta.textContent = "";
+          sizeOriginal.textContent = "—";
+          dimensionsEl.textContent = "—";
+          resetWebpOutput();
+          workspace.classList.remove("visible");
+          setDimsEnabled(false);
+          outWidthInput.value = "";
+          outHeightInput.value = "";
+        } else {
+          revokeBatchUrls();
+          state.batchItems = [];
+          renderBatchList();
+          updateBatchSummary();
+          batchWorkspace.classList.remove("visible");
+        }
+
+        fileInput.value = "";
+        state.converting = false;
+        setConvertIdle();
+        clearAlerts();
+        updateDropzoneIdle();
+        convertBtn.disabled = true;
+        resetBtn.disabled = false;
+        downloadAllBtn.disabled = true;
+
+        if (mode === "batch") {
+          batchWorkspace.classList.add("visible");
+          convertBtn.textContent = "تبدیل همه";
+        } else {
+          batchWorkspace.classList.remove("visible");
+          convertBtn.textContent = "تبدیل";
+          resetBtn.disabled = true;
+        }
+      }
+
+      function updateBatchSummary() {
+        var items = state.batchItems;
+        var orig = 0;
+        var webp = 0;
+        var done = 0;
+        items.forEach(function (item) {
+          orig += item.file.size || 0;
+          if (item.webpBlob) {
+            webp += item.webpBlob.size;
+            done += 1;
+          }
+        });
+        batchCountEl.textContent = toPersianDigits(items.length);
+        batchDoneCount.textContent = toPersianDigits(done);
+        batchSizeOriginal.textContent = items.length ? formatBytes(orig) : "—";
+        batchSizeWebp.textContent = done ? formatBytes(webp) : "—";
+        downloadAllBtn.disabled = done === 0 || state.converting;
+        convertBtn.disabled = items.length === 0 || state.converting;
+        resetBtn.disabled = state.converting;
+      }
+
+      function statusLabel(item) {
+        if (item.status === "busy") return "در حال تبدیل…";
+        if (item.status === "ok") return "آماده · " + formatBytes(item.webpBlob.size);
+        if (item.status === "error") return item.error || "خطا";
+        return "در انتظار";
+      }
+
+      function renderBatchList() {
+        var items = state.batchItems;
+        if (!items.length) {
+          batchList.innerHTML =
+            '<div class="batch-empty" id="batchEmpty">هنوز تصویری انتخاب نشده — چند فایل را یکجا انتخاب کنید.</div>';
+          return;
+        }
+
+        var nameMode = getBatchNameMode();
+        var html =
+          '<div class="batch-list-head">' +
+          "<span>نام فایل</span><span>حجم قبل</span><span>حجم بعد</span><span>وضعیت</span><span></span>" +
+          "</div>";
+
+        items.forEach(function (item) {
+          var outName = makeOutputName(item.file.name, nameMode);
+          var statusClass =
+            item.status === "ok"
+              ? "ok"
+              : item.status === "error"
+                ? "err"
+                : item.status === "busy"
+                  ? "busy"
+                  : "pending";
+          html +=
+            '<div class="batch-item" data-id="' +
+            item.id +
+            '">' +
+            '<div class="name">' +
+            escapeHtml(item.file.name) +
+            '<span class="out-name">→ ' +
+            escapeHtml(outName) +
+            "</span></div>" +
+            "<div>" +
+            formatBytes(item.file.size) +
+            "</div>" +
+            "<div>" +
+            (item.webpBlob ? formatBytes(item.webpBlob.size) : "—") +
+            "</div>" +
+            '<div class="status ' +
+            statusClass +
+            '">' +
+            escapeHtml(statusLabel(item)) +
+            "</div>" +
+            '<button type="button" class="btn btn-secondary batch-dl-btn" data-id="' +
+            item.id +
+            '"' +
+            (item.webpBlob && !state.converting ? "" : " disabled") +
+            ">دانلود</button>" +
+            "</div>";
+        });
+
+        batchList.innerHTML = html;
+      }
+
+      function resetAll() {
+        if (state.convertTimer) {
+          clearTimeout(state.convertTimer);
+          state.convertTimer = null;
+        }
+        revokeUrls();
+        revokeBatchUrls();
+        state.file = null;
+        state.webpBlob = null;
+        state.width = 0;
+        state.height = 0;
+        state.outWidth = 0;
+        state.outHeight = 0;
+        state.converting = false;
+        state.batchItems = [];
+        fileInput.value = "";
+        originalFrame.innerHTML = '<div class="placeholder">پیش‌نمایش تصویر قبلی</div>';
+        originalMeta.textContent = "";
+        sizeOriginal.textContent = "—";
+        dimensionsEl.textContent = "—";
+        resetWebpOutput();
+        workspace.classList.remove("visible");
+        renderBatchList();
+        updateBatchSummary();
+        convertBtn.disabled = true;
+        downloadAllBtn.disabled = true;
+        resetBtn.disabled = state.mode === "batch" ? false : true;
+        setDimsEnabled(false);
+        outWidthInput.value = "";
+        outHeightInput.value = "";
+        dimsHint.textContent = "بعد از انتخاب تصویر می‌توانید عرض و ارتفاع خروجی را مشخص کنید.";
+        setConvertIdle();
+        updateDropzoneIdle();
+        clearAlerts();
+      }
+
+      function setDimsEnabled(enabled) {
+        outWidthInput.disabled = !enabled;
+        outHeightInput.disabled = !enabled;
+        aspectLockBtn.disabled = !enabled;
+        resetDimsBtn.disabled = !enabled;
+      }
+
+      function clampDimension(value) {
+        var n = Math.round(Number(value));
+        if (!isFinite(n) || n < 1) return 1;
+        if (n > MAX_DIMENSION) return MAX_DIMENSION;
+        return n;
+      }
+
+      function setOutDimensions(width, height, updateInputs) {
+        state.outWidth = clampDimension(width);
+        state.outHeight = clampDimension(height);
+        if (updateInputs !== false) {
+          state.syncingDims = true;
+          outWidthInput.value = String(state.outWidth);
+          outHeightInput.value = String(state.outHeight);
+          state.syncingDims = false;
+        }
+        updateDimsHint();
+      }
+
+      function updateDimsHint() {
+        if (!state.width || !state.height) {
+          dimsHint.textContent = "بعد از انتخاب تصویر می‌توانید عرض و ارتفاع خروجی را مشخص کنید.";
+          return;
+        }
+        var changed =
+          state.outWidth !== state.width || state.outHeight !== state.height;
+        dimsHint.textContent = changed
+          ? "اصلی: " +
+          toPersianDigits(state.width) +
+          " × " +
+          toPersianDigits(state.height) +
+          " — خروجی: " +
+          toPersianDigits(state.outWidth) +
+          " × " +
+          toPersianDigits(state.outHeight)
+          : "ابعاد خروجی برابر با تصویر اصلی است. در صورت نیاز تغییر دهید.";
+      }
+
+      function syncAspectFromWidth() {
+        if (!state.keepAspect || !state.width || !state.height) return;
+        var ratio = state.height / state.width;
+        state.outHeight = clampDimension(state.outWidth * ratio);
+        state.syncingDims = true;
+        outHeightInput.value = String(state.outHeight);
+        state.syncingDims = false;
+      }
+
+      function syncAspectFromHeight() {
+        if (!state.keepAspect || !state.width || !state.height) return;
+        var ratio = state.width / state.height;
+        state.outWidth = clampDimension(state.outHeight * ratio);
+        state.syncingDims = true;
+        outWidthInput.value = String(state.outWidth);
+        state.syncingDims = false;
+      }
+
+      function readOutDimensionsFromInputs(source) {
+        if (source === "width") {
+          state.outWidth = clampDimension(outWidthInput.value);
+          outWidthInput.value = String(state.outWidth);
+          syncAspectFromWidth();
+        } else if (source === "height") {
+          state.outHeight = clampDimension(outHeightInput.value);
+          outHeightInput.value = String(state.outHeight);
+          syncAspectFromHeight();
+        }
+        updateDimsHint();
+      }
+
+      function setConvertBusy() {
+        state.converting = true;
+        convertBtn.disabled = true;
+        convertBtn.innerHTML = '<span class="spinner"></span> در حال تبدیل…';
+        downloadBtn.disabled = true;
+        downloadAllBtn.disabled = true;
+      }
+
+      function setConvertIdle() {
+        state.converting = false;
+        convertBtn.innerHTML = state.mode === "batch" ? "تبدیل همه" : "تبدیل";
+        if (state.mode === "batch") {
+          convertBtn.disabled = state.batchItems.length === 0;
+          downloadAllBtn.disabled = !state.batchItems.some(function (i) {
+            return !!i.webpBlob;
+          });
+        } else {
+          convertBtn.disabled = !state.file;
+          downloadBtn.disabled = !state.webpBlob;
+        }
+      }
+
+      function getExtension(name) {
+        var parts = name.split(".");
+        return parts.length > 1 ? parts.pop().toLowerCase() : "";
+      }
+
+      function looksLikeImage(file) {
+        if (file.type && file.type.indexOf("image/") === 0) return true;
+        var ext = getExtension(file.name);
+        return !!IMAGE_EXTENSIONS[ext];
+      }
+
+      function supportsWebPEncode() {
+        try {
+          var canvas = document.createElement("canvas");
+          canvas.width = 1;
+          canvas.height = 1;
+          var data = canvas.toDataURL("image/webp", 0.8).toLowerCase();
+          // Browsers that do not support WebP silently return PNG here.
+          return data.indexOf("data:image/webp") === 0 && data.length > 30;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function loadImageFromFile(file) {
+        return new Promise(function (resolve, reject) {
+          var url = URL.createObjectURL(file);
+          var img = new Image();
+
+          img.onload = function () {
+            if (!img.naturalWidth || !img.naturalHeight) {
+              URL.revokeObjectURL(url);
+              reject(new Error("ابعاد تصویر نامعتبر است یا فایل خراب است."));
+              return;
+            }
+            resolve({ img: img, url: url });
+          };
+
+          img.onerror = function () {
+            URL.revokeObjectURL(url);
+            var ext = getExtension(file.name);
+            var hint = "";
+            if (ext === "heic" || ext === "heif") {
+              hint = " فرمت HEIC/HEIF در این مرورگر پشتیبانی نمی‌شود؛ ابتدا به JPEG یا PNG تبدیل کنید.";
+            } else if (ext === "tif" || ext === "tiff") {
+              hint = " برخی فایل‌های TIFF در مرورگر قابل نمایش نیستند.";
+            } else if (ext === "avif") {
+              hint = " پشتیبانی AVIF به نسخه مرورگر بستگی دارد.";
+            }
+            reject(new Error("بارگذاری تصویر ناموفق بود." + hint));
+          };
+
+          img.src = url;
+        });
+      }
+
+      function canvasToWebpBlob(canvas, quality) {
+        return new Promise(function (resolve, reject) {
+          try {
+            if (canvas.toBlob) {
+              canvas.toBlob(
+                function (blob) {
+                  if (!blob) {
+                    reject(new Error("ساخت فایل WebP ناموفق بود. ممکن است حافظه کافی نباشد."));
+                    return;
+                  }
+                  if (blob.type && blob.type !== "image/webp") {
+                    reject(new Error("مرورگر خروجی WebP تولید نکرد. از مرورگر به‌روزتری استفاده کنید."));
+                    return;
+                  }
+                  resolve(blob);
+                },
+                "image/webp",
+                quality
+              );
+            } else {
+              var dataUrl = canvas.toDataURL("image/webp", quality);
+              if (dataUrl.indexOf("data:image/webp") !== 0) {
+                reject(new Error("مرورگر از کدگذاری WebP پشتیبانی نمی‌کند."));
+                return;
+              }
+              var parts = dataUrl.split(",");
+              var binary = atob(parts[1]);
+              var arr = new Uint8Array(binary.length);
+              for (var i = 0; i < binary.length; i++) {
+                arr[i] = binary.charCodeAt(i);
+              }
+              resolve(new Blob([arr], { type: "image/webp" }));
+            }
+          } catch (err) {
+            reject(err);
+          }
+        });
+      }
+
+      function updateSavings(originalSize, webpSize) {
+        if (!originalSize || !webpSize) {
+          sizeSaved.textContent = "—";
+          sizeSaved.className = "val";
+          return;
+        }
+        var diff = originalSize - webpSize;
+        var pct = (diff / originalSize) * 100;
+        var sign = diff >= 0 ? "−" : "+";
+        var absDiff = Math.abs(diff);
+        sizeSaved.textContent =
+          sign + formatBytes(absDiff) + " (" + toPersianDigits(Math.abs(pct).toFixed(1)) + "٪)";
+        sizeSaved.className = "val " + (diff >= 0 ? "good" : "bad");
+      }
+
+      function setOriginalPreview(url, file, width, height) {
+        originalFrame.innerHTML = "";
+        var img = document.createElement("img");
+        img.src = url;
+        img.alt = "تصویر قبلی (اصلی)";
+        originalFrame.appendChild(img);
+        originalMeta.textContent =
+          (file.type || getExtension(file.name).toUpperCase() || "تصویر") +
+          " · " +
+          formatBytes(file.size);
+        sizeOriginal.textContent = formatBytes(file.size);
+        updateDimensionsStat(width, height, state.outWidth, state.outHeight);
+      }
+
+      function updateDimensionsStat(origW, origH, outW, outH) {
+        if (!origW || !origH) {
+          dimensionsEl.textContent = "—";
+          return;
+        }
+        if (outW && outH && (outW !== origW || outH !== origH)) {
+          dimensionsEl.textContent =
+            toPersianDigits(origW) +
+            " × " +
+            toPersianDigits(origH) +
+            " → " +
+            toPersianDigits(outW) +
+            " × " +
+            toPersianDigits(outH);
+        } else {
+          dimensionsEl.textContent =
+            toPersianDigits(origW) + " × " + toPersianDigits(origH);
+        }
+      }
+
+      function setWebpPreview(blob, outW, outH) {
+        if (state.webpUrl) URL.revokeObjectURL(state.webpUrl);
+        state.webpUrl = URL.createObjectURL(blob);
+        state.webpBlob = blob;
+
+        webpFrame.innerHTML = "";
+        var img = document.createElement("img");
+        img.src = state.webpUrl;
+        img.alt = "تصویر جدید (WebP)";
+        webpFrame.appendChild(img);
+
+        webpMeta.textContent =
+          "WebP · " +
+          formatBytes(blob.size) +
+          " · " +
+          toPersianDigits(outW) +
+          " × " +
+          toPersianDigits(outH);
+        sizeWebp.textContent = formatBytes(blob.size);
+        updateSavings(state.file.size, blob.size);
+        updateDimensionsStat(state.width, state.height, outW, outH);
+        downloadBtn.disabled = false;
+      }
+
+      function getQuality() {
+        var quality = Number(qualityInput.value) / 100;
+        if (quality < 0.01) quality = 0.01;
+        if (quality > 1) quality = 1;
+        return quality;
+      }
+
+      function fitWithinMax(width, height) {
+        var w = Math.max(1, Math.round(Number(width) || 1));
+        var h = Math.max(1, Math.round(Number(height) || 1));
+        if (w <= MAX_DIMENSION && h <= MAX_DIMENSION) {
+          return { width: w, height: h };
+        }
+        var scale = Math.min(MAX_DIMENSION / w, MAX_DIMENSION / h);
+        return {
+          width: clampDimension(w * scale),
+          height: clampDimension(h * scale),
+        };
+      }
+
+      async function fileToWebpBlob(file, outW, outH, quality) {
+        var loaded = await loadImageFromFile(file);
+        var img = loaded.img;
+        var tempUrl = loaded.url;
+        try {
+          var sized;
+          if (outW && outH) {
+            sized = {
+              width: clampDimension(outW),
+              height: clampDimension(outH),
+            };
+          } else {
+            sized = fitWithinMax(img.naturalWidth, img.naturalHeight);
+          }
+
+          var canvas = document.createElement("canvas");
+          canvas.width = sized.width;
+          canvas.height = sized.height;
+
+          var ctx = canvas.getContext("2d");
+          if (!ctx) {
+            throw new Error("دسترسی به Canvas ممکن نیست.");
+          }
+
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(img, 0, 0, sized.width, sized.height);
+
+          var blob = await canvasToWebpBlob(canvas, quality);
+          return { blob: blob, width: sized.width, height: sized.height };
+        } finally {
+          URL.revokeObjectURL(tempUrl);
+        }
+      }
+
+      async function convert() {
+        if (state.mode === "batch") {
+          await convertBatch();
+          return;
+        }
+        if (!state.file || state.converting) return;
+
+        clearAlerts();
+
+        var outW = clampDimension(outWidthInput.value || state.outWidth || state.width);
+        var outH = clampDimension(outHeightInput.value || state.outHeight || state.height);
+        state.outWidth = outW;
+        state.outHeight = outH;
+        outWidthInput.value = String(outW);
+        outHeightInput.value = String(outH);
+        updateDimsHint();
+
+        setConvertBusy();
+        resetWebpOutput();
+
+        var quality = getQuality();
+
+        try {
+          var result = await fileToWebpBlob(state.file, outW, outH, quality);
+          setWebpPreview(result.blob, result.width, result.height);
+
+          if (result.blob.size >= state.file.size) {
+            showWarn("حجم WebP کمتر از اصل نشد. کیفیت را پایین‌تر بیاورید، ابعاد را کوچک‌تر کنید یا فایل از قبل فشرده است.");
+          } else {
+            showInfo(
+              "تبدیل با موفقیت انجام شد" +
+              (outW !== state.width || outH !== state.height
+                ? " — ابعاد خروجی: " +
+                toPersianDigits(outW) +
+                " × " +
+                toPersianDigits(outH)
+                : "") +
+              "."
+            );
+          }
+        } catch (err) {
+          var message = err && err.message
+            ? err.message
+            : "خطای ناشناخته هنگام تبدیل رخ داد.";
+          showError(message);
+          resetWebpOutput();
+        } finally {
+          setConvertIdle();
+        }
+      }
+
+      async function convertBatch(onlyPending) {
+        if (state.converting || !state.batchItems.length) return;
+
+        clearAlerts();
+
+        var targets = state.batchItems.filter(function (item) {
+          if (onlyPending) {
+            return item.status === "pending" || item.status === "error";
+          }
+          return true;
+        });
+
+        if (!targets.length) {
+          showInfo("همه فایل‌های لیست از قبل تبدیل شده‌اند.");
+          return;
+        }
+
+        setConvertBusy();
+        var quality = getQuality();
+        var ok = 0;
+        var fail = 0;
+
+        for (var i = 0; i < targets.length; i++) {
+          var item = targets[i];
+          if (item.webpUrl) {
+            URL.revokeObjectURL(item.webpUrl);
+            item.webpUrl = null;
+          }
+          item.webpBlob = null;
+          item.status = "busy";
+          item.error = "";
+          renderBatchList();
+          updateBatchSummary();
+
+          try {
+            var result = await fileToWebpBlob(item.file, null, null, quality);
+            item.webpBlob = result.blob;
+            item.webpUrl = URL.createObjectURL(result.blob);
+            item.width = result.width;
+            item.height = result.height;
+            item.status = "ok";
+            ok += 1;
+          } catch (err) {
+            item.status = "error";
+            item.error = err && err.message ? err.message : "تبدیل ناموفق";
+            fail += 1;
+          }
+
+          renderBatchList();
+          updateBatchSummary();
+        }
+
+        setConvertIdle();
+        renderBatchList();
+        updateBatchSummary();
+
+        if (fail && ok) {
+          showWarn(
+            toPersianDigits(ok) +
+            " فایل تبدیل شد، " +
+            toPersianDigits(fail) +
+            " فایل ناموفق بود."
+          );
+        } else if (fail && !ok) {
+          showError("هیچ فایلی تبدیل نشد. جزئیات خطا را در لیست ببینید.");
+        } else {
+          showInfo(
+            toPersianDigits(ok) +
+            " فایل با موفقیت به WebP تبدیل شد — بدون پیش‌نمایش."
+          );
+        }
+      }
+
+      function scheduleConvert() {
+        if (state.mode === "batch") return;
+        if (!state.file) return;
+        if (state.convertTimer) clearTimeout(state.convertTimer);
+        state.convertTimer = setTimeout(function () {
+          state.convertTimer = null;
+          convert();
+        }, CONVERT_DEBOUNCE_MS);
+      }
+
+      function fileKey(file) {
+        return file.name + "::" + file.size + "::" + (file.lastModified || 0);
+      }
+
+      async function handleBatchFiles(fileList) {
+        clearAlerts();
+        var files = Array.prototype.slice.call(fileList || []);
+        if (!files.length) {
+          showError("فایلی انتخاب نشد.");
+          return;
+        }
+
+        var accepted = [];
+        var skipped = 0;
+        files.forEach(function (file) {
+          if (!looksLikeImage(file) || file.size === 0 || file.size > MAX_FILE_BYTES) {
+            skipped += 1;
+            return;
+          }
+          accepted.push(file);
+        });
+
+        if (!accepted.length) {
+          showError("هیچ تصویر معتبری در انتخاب شما نبود.");
+          return;
+        }
+
+        var addMode = getBatchAddMode();
+        if (addMode === "replace") {
+          revokeBatchUrls();
+          state.batchItems = [];
+        }
+
+        var existing = {};
+        state.batchItems.forEach(function (item) {
+          existing[fileKey(item.file)] = true;
+        });
+
+        var added = 0;
+        accepted.forEach(function (file) {
+          var key = fileKey(file);
+          if (existing[key]) return;
+          existing[key] = true;
+          state.batchIdSeq += 1;
+          state.batchItems.push({
+            id: state.batchIdSeq,
+            file: file,
+            webpBlob: null,
+            webpUrl: null,
+            width: 0,
+            height: 0,
+            status: "pending",
+            error: "",
+          });
+          added += 1;
+        });
+
+        batchWorkspace.classList.add("visible");
+        updateDropzoneIdle();
+        renderBatchList();
+        updateBatchSummary();
+        resetBtn.disabled = false;
+
+        var notes = [];
+        if (added) notes.push(toPersianDigits(added) + " فایل به لیست اضافه شد");
+        if (skipped) notes.push(toPersianDigits(skipped) + " فایل رد شد");
+        if (accepted.length && !added && addMode === "append") {
+          notes.push("فایل‌های تکراری نادیده گرفته شدند");
+        }
+        if (notes.length) showInfo(notes.join(" — ") + ".");
+
+        fileInput.value = "";
+
+        if (added) {
+          await convertBatch(true);
+        }
+      }
+
+      async function handleFile(file) {
+        clearAlerts();
+
+        if (!file) {
+          showError("فایلی انتخاب نشد.");
+          return;
+        }
+
+        if (!looksLikeImage(file)) {
+          showError("این فایل به‌نظر تصویر نیست. فرمت‌های رایج تصویر را انتخاب کنید.");
+          return;
+        }
+
+        if (file.size === 0) {
+          showError("فایل خالی است.");
+          return;
+        }
+
+        if (file.size > MAX_FILE_BYTES) {
+          showError("حجم فایل بیش از ۸۰ مگابایت است. فایل کوچک‌تری انتخاب کنید.");
+          return;
+        }
+
+        revokeUrls();
+        state.webpBlob = null;
+        state.file = file;
+
+        try {
+          var loaded = await loadImageFromFile(file);
+          state.objectUrl = loaded.url;
+          state.width = loaded.img.naturalWidth;
+          state.height = loaded.img.naturalHeight;
+          setOutDimensions(state.width, state.height);
+          setDimsEnabled(true);
+
+          dropzone.classList.add("has-file");
+          dropzone.innerHTML =
+            '<p class="file-name">' +
+            escapeHtml(file.name) +
+            "</p><p>" +
+            formatBytes(file.size) +
+            " — برای تعویض، دوباره کلیک یا رها کنید</p>";
+
+          setOriginalPreview(state.objectUrl, file, state.width, state.height);
+          resetWebpOutput();
+          workspace.classList.add("visible");
+          convertBtn.disabled = false;
+          resetBtn.disabled = false;
+
+          var ext = getExtension(file.name);
+          if (ext === "webp") {
+            showWarn("فایل از قبل WebP است؛ می‌توانید با کیفیت جدید دوباره فشرده کنید.");
+          }
+
+          await convert();
+        } catch (err) {
+          state.file = null;
+          convertBtn.disabled = true;
+          resetBtn.disabled = true;
+          setDimsEnabled(false);
+          outWidthInput.value = "";
+          outHeightInput.value = "";
+          workspace.classList.remove("visible");
+          showError(err && err.message ? err.message : "بارگذاری فایل ناموفق بود.");
+        }
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function triggerDownload(url, fileName) {
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      function downloadWebp() {
+        if (!state.webpBlob || !state.file) {
+          showError("هنوز فایل WebP آماده‌ای برای دانلود نیست.");
+          return;
+        }
+        try {
+          var fileName = makeOutputName(state.file.name, "replace");
+          triggerDownload(state.webpUrl, fileName);
+          showInfo("دانلود شروع شد — فایل در پوشه Downloads ذخیره می‌شود: " + fileName);
+        } catch (err) {
+          showError("دانلود ناموفق بود: " + (err.message || "خطای ناشناخته"));
+        }
+      }
+
+      function downloadBatchItem(id) {
+        var item = null;
+        for (var i = 0; i < state.batchItems.length; i++) {
+          if (state.batchItems[i].id === id) {
+            item = state.batchItems[i];
+            break;
+          }
+        }
+        if (!item || !item.webpBlob || !item.webpUrl) {
+          showError("این فایل هنوز برای دانلود آماده نیست.");
+          return;
+        }
+        try {
+          var fileName = makeOutputName(item.file.name, getBatchNameMode());
+          triggerDownload(item.webpUrl, fileName);
+          showInfo("دانلود: " + fileName);
+        } catch (err) {
+          showError("دانلود ناموفق بود: " + (err.message || "خطای ناشناخته"));
+        }
+      }
+
+      async function downloadAllBatch() {
+        var ready = state.batchItems.filter(function (item) {
+          return item.webpBlob && item.webpUrl;
+        });
+        if (!ready.length) {
+          showError("هنوز فایل آماده‌ای برای دانلود نیست.");
+          return;
+        }
+        var nameMode = getBatchNameMode();
+        downloadAllBtn.disabled = true;
+        showInfo(
+          "دانلود " +
+          toPersianDigits(ready.length) +
+          " فایل آغاز شد — اگر مرورگر مسدود کرد، اجازه دانلود چندتایی بدهید."
+        );
+        for (var i = 0; i < ready.length; i++) {
+          try {
+            triggerDownload(
+              ready[i].webpUrl,
+              makeOutputName(ready[i].file.name, nameMode)
+            );
+          } catch (err) {
+            /* continue others */
+          }
+          await new Promise(function (resolve) {
+            setTimeout(resolve, 350);
+          });
+        }
+        downloadAllBtn.disabled = false;
+      }
+
+      /* Events */
+      modeSingleBtn.addEventListener("click", function () {
+        setMode("single");
+      });
+      modeBatchBtn.addEventListener("click", function () {
+        setMode("batch");
+      });
+
+      document.querySelectorAll('input[name="batchAddMode"]').forEach(function (el) {
+        el.addEventListener("change", function () {
+          if (state.mode === "batch") updateDropzoneIdle();
+        });
+      });
+
+      document.querySelectorAll('input[name="batchNameMode"]').forEach(function (el) {
+        el.addEventListener("change", function () {
+          if (state.mode === "batch") renderBatchList();
+        });
+      });
+
+      batchList.addEventListener("click", function (e) {
+        var btn = e.target.closest(".batch-dl-btn");
+        if (!btn) return;
+        var id = Number(btn.getAttribute("data-id"));
+        if (id) downloadBatchItem(id);
+      });
+
+      qualityInput.addEventListener("input", function () {
+        qualityValue.textContent = toPersianDigits(qualityInput.value);
+        if (state.mode === "single" && state.file) scheduleConvert();
+      });
+
+      outWidthInput.addEventListener("input", function () {
+        if (state.syncingDims || !state.file) return;
+        readOutDimensionsFromInputs("width");
+        scheduleConvert();
+      });
+
+      outHeightInput.addEventListener("input", function () {
+        if (state.syncingDims || !state.file) return;
+        readOutDimensionsFromInputs("height");
+        scheduleConvert();
+      });
+
+      outWidthInput.addEventListener("change", function () {
+        if (state.syncingDims || !state.file) return;
+        readOutDimensionsFromInputs("width");
+        scheduleConvert();
+      });
+
+      outHeightInput.addEventListener("change", function () {
+        if (state.syncingDims || !state.file) return;
+        readOutDimensionsFromInputs("height");
+        scheduleConvert();
+      });
+
+      aspectLockBtn.addEventListener("click", function () {
+        state.keepAspect = !state.keepAspect;
+        aspectLockBtn.classList.toggle("active", state.keepAspect);
+        aspectLockBtn.setAttribute("aria-pressed", state.keepAspect ? "true" : "false");
+        aspectLockBtn.textContent = state.keepAspect ? "🔗 نسبت ثابت" : "🔓 نسبت آزاد";
+        if (state.keepAspect && state.file) {
+          syncAspectFromWidth();
+          updateDimsHint();
+          scheduleConvert();
+        }
+      });
+
+      resetDimsBtn.addEventListener("click", function () {
+        if (!state.width || !state.height) return;
+        setOutDimensions(state.width, state.height);
+        scheduleConvert();
+      });
+
+      convertBtn.addEventListener("click", function () {
+        convert();
+      });
+
+      downloadBtn.addEventListener("click", downloadWebp);
+      downloadAllBtn.addEventListener("click", function () {
+        downloadAllBatch();
+      });
+      resetBtn.addEventListener("click", resetAll);
+
+      dropzone.addEventListener("click", function () {
+        fileInput.click();
+      });
+
+      dropzone.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          fileInput.click();
+        }
+      });
+
+      fileInput.addEventListener("change", function () {
+        if (!fileInput.files || !fileInput.files.length) return;
+        if (state.mode === "batch") {
+          handleBatchFiles(fileInput.files);
+        } else {
+          handleFile(fileInput.files[0]);
+        }
+      });
+
+      dropzone.addEventListener("dragenter", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add("dragover");
+      });
+
+      dropzone.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add("dragover");
+      });
+
+      dropzone.addEventListener("dragleave", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!dropzone.contains(e.relatedTarget)) {
+          dropzone.classList.remove("dragover");
+        }
+      });
+
+      dropzone.addEventListener("drop", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove("dragover");
+        var files = e.dataTransfer && e.dataTransfer.files;
+        if (!files || !files.length) {
+          showError("فایلی رها نشد.");
+          return;
+        }
+        if (state.mode === "batch") {
+          handleBatchFiles(files);
+          return;
+        }
+        if (files.length > 1) {
+          showWarn("در حالت تک‌فایل فقط اولین تصویر پردازش می‌شود. برای چندتایی، حالت «چندفایل» را انتخاب کنید.");
+        }
+        handleFile(files[0]);
+      });
+
+      window.addEventListener("dragover", function (e) {
+        e.preventDefault();
+      });
+      window.addEventListener("drop", function (e) {
+        e.preventDefault();
+      });
+
+      qualityValue.textContent = toPersianDigits(qualityInput.value);
+      batchWorkspace.classList.remove("visible");
+      downloadAllBtn.style.display = "none";
+
+    })();
+
+    /* ═══════════ Password Generator ═══════════ */
+    (function () {
+      "use strict";
+
+      var UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      var LOWER = "abcdefghijklmnopqrstuvwxyz";
+      var DIGITS = "0123456789";
+      var SYMBOLS = "!@#$%^&*_+-='.<>?/~";
+      var AMBIGUOUS = "0OolL1Ii";
+
+      var pwdOutput = document.getElementById("pwdOutput");
+      var pwdCopyBtn = document.getElementById("pwdCopyBtn");
+      var pwdLengthInput = document.getElementById("pwdLength");
+      var pwdLengthVal = document.getElementById("pwdLengthVal");
+      var pwdCountInput = document.getElementById("pwdCount");
+      var pwdCountVal = document.getElementById("pwdCountVal");
+      var pwdUpper = document.getElementById("pwdUpper");
+      var pwdLower = document.getElementById("pwdLower");
+      var pwdDigits = document.getElementById("pwdDigits");
+      var pwdSymbols = document.getElementById("pwdSymbols");
+      var pwdNoAmbiguous = document.getElementById("pwdNoAmbiguous");
+      var pwdGenerateBtn = document.getElementById("pwdGenerateBtn");
+      var pwdCopyAllBtn = document.getElementById("pwdCopyAllBtn");
+      var pwdList = document.getElementById("pwdList");
+      var pwdError = document.getElementById("pwdError");
+      var pwdStrengthFill = document.getElementById("pwdStrengthFill");
+      var pwdStrengthLabel = document.getElementById("pwdStrengthLabel");
+
+      var generatedPasswords = [];
+
+      function buildCharset() {
+        var chars = "";
+        if (pwdUpper.checked) chars += UPPER;
+        if (pwdLower.checked) chars += LOWER;
+        if (pwdDigits.checked) chars += DIGITS;
+        if (pwdSymbols.checked) chars += SYMBOLS;
+
+        if (pwdNoAmbiguous.checked) {
+          chars = chars.split("").filter(function (c) {
+            return AMBIGUOUS.indexOf(c) === -1;
+          }).join("");
+        }
+        return chars;
+      }
+
+      function secureRandom(max) {
+        var arr = new Uint32Array(1);
+        crypto.getRandomValues(arr);
+        return arr[0] % max;
+      }
+
+      function generateOne(length, charset) {
+        var result = "";
+        for (var i = 0; i < length; i++) {
+          result += charset[secureRandom(charset.length)];
+        }
+        return result;
+      }
+
+      function calcStrength(pw) {
+        var poolSize = 0;
+        if (/[a-z]/.test(pw)) poolSize += 26;
+        if (/[A-Z]/.test(pw)) poolSize += 26;
+        if (/[0-9]/.test(pw)) poolSize += 10;
+        if (/[^a-zA-Z0-9]/.test(pw)) poolSize += 32;
+        var entropy = pw.length * Math.log2(poolSize || 1);
+        if (entropy < 28) return { level: 0, label: "بسیار ضعیف", color: "#d45b5b" };
+        if (entropy < 36) return { level: 1, label: "ضعیف", color: "#d47b3b" };
+        if (entropy < 60) return { level: 2, label: "متوسط", color: "#c9a227" };
+        if (entropy < 80) return { level: 3, label: "قوی", color: "#6ab04c" };
+        return { level: 4, label: "بسیار قوی", color: "#3d9a78" };
+      }
+
+      function updateStrength(pw) {
+        if (!pw) {
+          pwdStrengthFill.style.width = "0";
+          pwdStrengthLabel.textContent = "";
+          return;
+        }
+        var s = calcStrength(pw);
+        var pct = Math.min(100, (s.level + 1) * 25);
+        pwdStrengthFill.style.width = pct + "%";
+        pwdStrengthFill.style.background = s.color;
+        pwdStrengthLabel.textContent = "قدرت: " + s.label;
+        pwdStrengthLabel.style.color = s.color;
+      }
+
+      function showPwdError(msg) {
+        pwdError.textContent = msg;
+        pwdError.classList.add("visible");
+      }
+
+      function clearPwdError() {
+        pwdError.textContent = "";
+        pwdError.classList.remove("visible");
+      }
+
+      function escHtml(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+      }
+
+      function copyToClipboard(text, feedback) {
+        navigator.clipboard.writeText(text).then(function () {
+          if (feedback) {
+            var orig = feedback.textContent;
+            feedback.textContent = "✓";
+            setTimeout(function () { feedback.textContent = orig; }, 1200);
+          }
+        });
+      }
+
+      function renderList() {
+        pwdList.innerHTML = "";
+        if (generatedPasswords.length <= 1) {
+          pwdCopyAllBtn.disabled = true;
+          return;
+        }
+        pwdCopyAllBtn.disabled = false;
+        generatedPasswords.forEach(function (pw, idx) {
+          var div = document.createElement("div");
+          div.className = "pwd-list-item";
+          var span = document.createElement("span");
+          span.className = "pwd-text";
+          span.textContent = pw;
+          var btn = document.createElement("button");
+          btn.className = "pwd-item-copy";
+          btn.textContent = "کپی";
+          btn.addEventListener("click", function () {
+            copyToClipboard(pw, btn);
+          });
+          div.appendChild(span);
+          div.appendChild(btn);
+          pwdList.appendChild(div);
+        });
+      }
+
+      function generate() {
+        clearPwdError();
+        var charset = buildCharset();
+        if (!charset) {
+          showPwdError("حداقل یک نوع کاراکتر را انتخاب کنید.");
+          return;
+        }
+        var length = parseInt(pwdLengthInput.value, 10) || 16;
+        var count = parseInt(pwdCountInput.value, 10) || 1;
+
+        generatedPasswords = [];
+        for (var i = 0; i < count; i++) {
+          generatedPasswords.push(generateOne(length, charset));
+        }
+
+        pwdOutput.value = generatedPasswords[0];
+        updateStrength(generatedPasswords[0]);
+        renderList();
+      }
+
+      pwdLengthInput.addEventListener("input", function () {
+        pwdLengthVal.textContent = pwdLengthInput.value;
+      });
+
+      pwdCountInput.addEventListener("input", function () {
+        pwdCountVal.textContent = pwdCountInput.value;
+      });
+
+      pwdGenerateBtn.addEventListener("click", generate);
+
+      pwdCopyBtn.addEventListener("click", function () {
+        if (pwdOutput.value) copyToClipboard(pwdOutput.value, pwdCopyBtn);
+      });
+
+      pwdCopyAllBtn.addEventListener("click", function () {
+        if (generatedPasswords.length) {
+          copyToClipboard(generatedPasswords.join("\n"), pwdCopyAllBtn);
+        }
+      });
+
+      [pwdUpper, pwdLower, pwdDigits, pwdSymbols, pwdNoAmbiguous].forEach(function (el) {
+        el.addEventListener("change", function () {
+          if (pwdOutput.value) generate();
+        });
+      });
+
+      generate();
+    })();
+
+    /* ═══════════ Tabs ═══════════ */
+    (function () {
+      "use strict";
+      var buttons = document.querySelectorAll(".tab-btn");
+      var panels = {
+        webp: document.getElementById("tab-webp"),
+        crop: document.getElementById("tab-crop"),
+        password: document.getElementById("tab-password"),
+      };
+      var VALID = { webp: true, crop: true, password: true };
+
+      function tabFromHash() {
+        var hash = (location.hash || "").replace(/^#/, "").toLowerCase();
+        if (VALID[hash]) return hash;
+        return "webp";
+      }
+
+      function activate(name, pushHash) {
+        if (!VALID[name]) name = "webp";
+        buttons.forEach(function (btn) {
+          var on = btn.getAttribute("data-tab") === name;
+          btn.classList.toggle("active", on);
+          btn.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        Object.keys(panels).forEach(function (key) {
+          panels[key].classList.toggle("active", key === name);
+        });
+        if (pushHash !== false && location.hash.replace(/^#/, "") !== name) {
+          history.replaceState(null, "", "#" + name);
+        }
+      }
+
+      buttons.forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+          e.preventDefault();
+          var name = btn.getAttribute("data-tab");
+          activate(name);
+        });
+      });
+
+      window.addEventListener("hashchange", function () {
+        activate(tabFromHash(), false);
+      });
+
+      activate(tabFromHash(), true);
+    })();
+
+    /* ═══════════ Image Crop ═══════════ */
+    (function () {
+      "use strict";
+
+      var dropzone = document.getElementById("cropDropzone");
+      var fileInput = document.getElementById("cropFileInput");
+      var widthInput = document.getElementById("cropWidth");
+      var heightInput = document.getElementById("cropHeight");
+      var aspectLockBtn = document.getElementById("cropAspectLock");
+      var saveBtn = document.getElementById("cropSaveBtn");
+      var resetBtn = document.getElementById("cropResetBtn");
+      var errorBox = document.getElementById("cropError");
+      var infoBox = document.getElementById("cropInfo");
+      var hintEl = document.getElementById("cropHint");
+      var stageWrap = document.getElementById("cropStageWrap");
+      var stage = document.getElementById("cropStage");
+      var imgEl = document.getElementById("cropImg");
+      var boxEl = document.getElementById("cropBox");
+      var boxLabel = document.getElementById("cropBoxLabel");
+      var previewRow = document.getElementById("cropPreviewRow");
+      var previewImg = document.getElementById("cropPreviewImg");
+
+      var MAX_FILE_BYTES = 80 * 1024 * 1024;
+      var MAX_DIMENSION = 8192;
+      var IMAGE_EXTENSIONS = {
+        jpg: true, jpeg: true, png: true, gif: true, bmp: true,
+        webp: true, svg: true, ico: true, tif: true, tiff: true,
+        avif: true, heic: true, heif: true, jfif: true, apng: true,
+      };
+
+      var DEFAULT_CROP_W = 1920;
+      var DEFAULT_CROP_H = 1080;
+
+      var state = {
+        file: null,
+        objectUrl: null,
+        previewUrl: null,
+        naturalW: 0,
+        naturalH: 0,
+        cropW: DEFAULT_CROP_W,
+        cropH: DEFAULT_CROP_H,
+        cropX: 0,
+        cropY: 0,
+        keepAspect: true,
+        syncing: false,
+        dragging: false,
+        dragStartX: 0,
+        dragStartY: 0,
+        dragOriginX: 0,
+        dragOriginY: 0,
+        aspectRatio: DEFAULT_CROP_W / DEFAULT_CROP_H,
+      };
+
+      function toPersianDigits(str) {
+        return String(str).replace(/\d/g, function (d) {
+          return "۰۱۲۳۴۵۶۷۸۹"[d];
+        });
+      }
+
+      function getExtension(name) {
+        var parts = name.split(".");
+        return parts.length > 1 ? parts.pop().toLowerCase() : "";
+      }
+
+      function looksLikeImage(file) {
+        if (file.type && file.type.indexOf("image/") === 0) return true;
+        return !!IMAGE_EXTENSIONS[getExtension(file.name)];
+      }
+
+      function clamp(n, min, max) {
+        return Math.min(max, Math.max(min, n));
+      }
+
+      function clampDim(value) {
+        var n = Math.round(Number(value));
+        if (!isFinite(n) || n < 1) return 1;
+        if (n > MAX_DIMENSION) return MAX_DIMENSION;
+        return n;
+      }
+
+      function clearAlerts() {
+        errorBox.classList.remove("visible");
+        infoBox.classList.remove("visible");
+        errorBox.textContent = "";
+        infoBox.textContent = "";
+      }
+
+      function showError(msg) {
+        clearAlerts();
+        errorBox.textContent = msg;
+        errorBox.classList.add("visible");
+      }
+
+      function showInfo(msg) {
+        infoBox.textContent = msg;
+        infoBox.classList.add("visible");
+      }
+
+      function setControlsEnabled(on) {
+        widthInput.disabled = !on;
+        heightInput.disabled = !on;
+        aspectLockBtn.disabled = !on;
+        saveBtn.disabled = !on;
+        resetBtn.disabled = !on;
+      }
+
+      function getScale() {
+        if (!state.naturalW || !imgEl.clientWidth) return 1;
+        return imgEl.clientWidth / state.naturalW;
+      }
+
+      function clampCropRect() {
+        state.cropW = clampDim(Math.min(state.cropW, state.naturalW));
+        state.cropH = clampDim(Math.min(state.cropH, state.naturalH));
+        state.cropX = clamp(state.cropX, 0, Math.max(0, state.naturalW - state.cropW));
+        state.cropY = clamp(state.cropY, 0, Math.max(0, state.naturalH - state.cropH));
+      }
+
+      function updateBoxUI() {
+        if (!state.naturalW) return;
+        var scale = getScale();
+        boxEl.hidden = false;
+        boxEl.style.left = state.cropX * scale + "px";
+        boxEl.style.top = state.cropY * scale + "px";
+        boxEl.style.width = state.cropW * scale + "px";
+        boxEl.style.height = state.cropH * scale + "px";
+        boxLabel.textContent =
+          toPersianDigits(state.cropW) + " × " + toPersianDigits(state.cropH);
+        hintEl.textContent =
+          "تصویر: " +
+          toPersianDigits(state.naturalW) +
+          " × " +
+          toPersianDigits(state.naturalH) +
+          " — کادر: " +
+          toPersianDigits(state.cropW) +
+          " × " +
+          toPersianDigits(state.cropH) +
+          " در (" +
+          toPersianDigits(Math.round(state.cropX)) +
+          "، " +
+          toPersianDigits(Math.round(state.cropY)) +
+          ")";
+        updatePreview();
+      }
+
+      function updatePreview() {
+        if (!state.naturalW || !imgEl.complete) return;
+        try {
+          var canvas = document.createElement("canvas");
+          canvas.width = state.cropW;
+          canvas.height = state.cropH;
+          var ctx = canvas.getContext("2d");
+          if (!ctx) return;
+          ctx.drawImage(
+            imgEl,
+            state.cropX,
+            state.cropY,
+            state.cropW,
+            state.cropH,
+            0,
+            0,
+            state.cropW,
+            state.cropH
+          );
+          if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+          canvas.toBlob(function (blob) {
+            if (!blob) return;
+            if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+            state.previewUrl = URL.createObjectURL(blob);
+            previewImg.src = state.previewUrl;
+            previewRow.classList.add("visible");
+          }, "image/png");
+        } catch (e) {
+          /* ignore preview errors while dragging */
+        }
+      }
+
+      function syncInputsFromState() {
+        state.syncing = true;
+        widthInput.value = String(state.cropW);
+        heightInput.value = String(state.cropH);
+        state.syncing = false;
+      }
+
+      function applyCropSize(from) {
+        if (!state.naturalW) return;
+        var w = clampDim(widthInput.value);
+        var h = clampDim(heightInput.value);
+
+        if (state.keepAspect && state.aspectRatio > 0) {
+          if (from === "width") {
+            h = clampDim(w / state.aspectRatio);
+          } else if (from === "height") {
+            w = clampDim(h * state.aspectRatio);
+          }
+        }
+
+        w = Math.min(w, state.naturalW);
+        h = Math.min(h, state.naturalH);
+
+        if (state.keepAspect && state.aspectRatio > 0) {
+          if (from === "width") {
+            h = Math.min(clampDim(w / state.aspectRatio), state.naturalH);
+            w = Math.min(clampDim(h * state.aspectRatio), state.naturalW);
+          } else if (from === "height") {
+            w = Math.min(clampDim(h * state.aspectRatio), state.naturalW);
+            h = Math.min(clampDim(w / state.aspectRatio), state.naturalH);
+          } else {
+            if (w / h > state.aspectRatio) {
+              w = Math.min(clampDim(h * state.aspectRatio), state.naturalW);
+            } else {
+              h = Math.min(clampDim(w / state.aspectRatio), state.naturalH);
+            }
+          }
+        }
+
+        state.cropW = w;
+        state.cropH = h;
+        clampCropRect();
+        syncInputsFromState();
+        updateBoxUI();
+      }
+
+      function centerCrop() {
+        state.cropX = Math.max(0, Math.round((state.naturalW - state.cropW) / 2));
+        state.cropY = Math.max(0, Math.round((state.naturalH - state.cropH) / 2));
+      }
+
+      function resetAll() {
+        if (state.objectUrl) URL.revokeObjectURL(state.objectUrl);
+        if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+        state.file = null;
+        state.objectUrl = null;
+        state.previewUrl = null;
+        state.naturalW = 0;
+        state.naturalH = 0;
+        state.cropX = 0;
+        state.cropY = 0;
+        fileInput.value = "";
+        imgEl.removeAttribute("src");
+        boxEl.hidden = true;
+        stageWrap.classList.remove("visible");
+        previewRow.classList.remove("visible");
+        previewImg.removeAttribute("src");
+        setControlsEnabled(false);
+        widthInput.value = String(DEFAULT_CROP_W);
+        heightInput.value = String(DEFAULT_CROP_H);
+        state.cropW = DEFAULT_CROP_W;
+        state.cropH = DEFAULT_CROP_H;
+        state.aspectRatio = DEFAULT_CROP_W / DEFAULT_CROP_H;
+        hintEl.textContent = "بعد از انتخاب تصویر، ابعاد کادر را مشخص کنید و آن را روی تصویر جابجا کنید.";
+        dropzone.classList.remove("has-file");
+        dropzone.innerHTML =
+          '<div class="icon" aria-hidden="true">⬆</div>' +
+          "<h2>تصویر را برای کراپ رها کنید یا کلیک کنید</h2>" +
+          "<p>ابعاد کادر را وارد کنید، کادر را جابجا کنید، سپس ذخیره کنید</p>";
+        clearAlerts();
+      }
+
+      function loadFile(file) {
+        clearAlerts();
+        if (!file) {
+          showError("فایلی انتخاب نشد.");
+          return;
+        }
+        if (!looksLikeImage(file)) {
+          showError("این فایل به‌نظر تصویر نیست.");
+          return;
+        }
+        if (file.size === 0) {
+          showError("فایل خالی است.");
+          return;
+        }
+        if (file.size > MAX_FILE_BYTES) {
+          showError("حجم فایل بیش از ۸۰ مگابایت است.");
+          return;
+        }
+
+        if (state.objectUrl) URL.revokeObjectURL(state.objectUrl);
+        if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
+        state.previewUrl = null;
+
+        var url = URL.createObjectURL(file);
+        var probe = new Image();
+        probe.onload = function () {
+          if (!probe.naturalWidth || !probe.naturalHeight) {
+            URL.revokeObjectURL(url);
+            showError("ابعاد تصویر نامعتبر است.");
+            return;
+          }
+          state.file = file;
+          state.objectUrl = url;
+          state.naturalW = probe.naturalWidth;
+          state.naturalH = probe.naturalHeight;
+
+          var wantW = clampDim(widthInput.value || DEFAULT_CROP_W);
+          var wantH = clampDim(heightInput.value || DEFAULT_CROP_H);
+          state.cropW = Math.min(wantW, state.naturalW);
+          state.cropH = Math.min(wantH, state.naturalH);
+          if (state.keepAspect) {
+            state.aspectRatio = wantW / wantH;
+            if (state.cropW / state.cropH > state.aspectRatio) {
+              state.cropW = Math.min(clampDim(state.cropH * state.aspectRatio), state.naturalW);
+            } else {
+              state.cropH = Math.min(clampDim(state.cropW / state.aspectRatio), state.naturalH);
+            }
+          } else {
+            state.aspectRatio = state.cropW / state.cropH;
+          }
+          centerCrop();
+          syncInputsFromState();
+
+          imgEl.onload = function () {
+            stageWrap.classList.add("visible");
+            setControlsEnabled(true);
+            updateBoxUI();
+            showInfo("کادر را جابجا کنید و در صورت نیاز ابعاد را تغییر دهید.");
+          };
+          imgEl.src = url;
+
+          dropzone.classList.add("has-file");
+          dropzone.innerHTML =
+            '<p class="file-name">' +
+            escapeHtml(file.name) +
+            "</p><p>" +
+            toPersianDigits(state.naturalW) +
+            " × " +
+            toPersianDigits(state.naturalH) +
+            " — برای تعویض، دوباره کلیک یا رها کنید</p>";
+        };
+        probe.onerror = function () {
+          URL.revokeObjectURL(url);
+          var ext = getExtension(file.name);
+          var hint = "";
+          if (ext === "heic" || ext === "heif") {
+            hint = " فرمت HEIC/HEIF در این مرورگر پشتیبانی نمی‌شود.";
+          }
+          showError("بارگذاری تصویر ناموفق بود." + hint);
+        };
+        probe.src = url;
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function saveCrop() {
+        if (!state.file || !state.naturalW) {
+          showError("ابتدا تصویری انتخاب کنید.");
+          return;
+        }
+        clampCropRect();
+        try {
+          var canvas = document.createElement("canvas");
+          canvas.width = state.cropW;
+          canvas.height = state.cropH;
+          var ctx = canvas.getContext("2d");
+          if (!ctx) throw new Error("دسترسی به Canvas ممکن نیست.");
+          ctx.drawImage(
+            imgEl,
+            state.cropX,
+            state.cropY,
+            state.cropW,
+            state.cropH,
+            0,
+            0,
+            state.cropW,
+            state.cropH
+          );
+          canvas.toBlob(function (blob) {
+            if (!blob) {
+              showError("ساخت فایل ناموفق بود.");
+              return;
+            }
+            var base = state.file.name.replace(/\.[^.]+$/, "") || "image";
+            var fileName =
+              base +
+              "-crop-" +
+              state.cropW +
+              "x" +
+              state.cropH +
+              ".png";
+            var link = document.createElement("a");
+            var url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(function () {
+              URL.revokeObjectURL(url);
+            }, 1500);
+            showInfo("ذخیره شد: " + fileName);
+          }, "image/png");
+        } catch (err) {
+          showError(err && err.message ? err.message : "خطا هنگام ذخیره کراپ.");
+        }
+      }
+
+      function pointerPos(e) {
+        if (e.touches && e.touches[0]) {
+          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+      }
+
+      boxEl.addEventListener("pointerdown", function (e) {
+        if (!state.naturalW) return;
+        e.preventDefault();
+        boxEl.setPointerCapture(e.pointerId);
+        state.dragging = true;
+        var p = pointerPos(e);
+        state.dragStartX = p.x;
+        state.dragStartY = p.y;
+        state.dragOriginX = state.cropX;
+        state.dragOriginY = state.cropY;
+      });
+
+      boxEl.addEventListener("pointermove", function (e) {
+        if (!state.dragging) return;
+        e.preventDefault();
+        var scale = getScale();
+        if (!scale) return;
+        var p = pointerPos(e);
+        var dx = (p.x - state.dragStartX) / scale;
+        var dy = (p.y - state.dragStartY) / scale;
+        state.cropX = state.dragOriginX + dx;
+        state.cropY = state.dragOriginY + dy;
+        clampCropRect();
+        updateBoxUI();
+      });
+
+      function endDrag(e) {
+        if (!state.dragging) return;
+        state.dragging = false;
+        try {
+          boxEl.releasePointerCapture(e.pointerId);
+        } catch (err) { /* ignore */ }
+        updateBoxUI();
+      }
+
+      boxEl.addEventListener("pointerup", endDrag);
+      boxEl.addEventListener("pointercancel", endDrag);
+
+      widthInput.addEventListener("input", function () {
+        if (state.syncing || !state.naturalW) return;
+        applyCropSize("width");
+      });
+      heightInput.addEventListener("input", function () {
+        if (state.syncing || !state.naturalW) return;
+        applyCropSize("height");
+      });
+      widthInput.addEventListener("change", function () {
+        if (state.syncing || !state.naturalW) return;
+        applyCropSize("width");
+      });
+      heightInput.addEventListener("change", function () {
+        if (state.syncing || !state.naturalW) return;
+        applyCropSize("height");
+      });
+
+      aspectLockBtn.addEventListener("click", function () {
+        state.keepAspect = !state.keepAspect;
+        aspectLockBtn.classList.toggle("active", state.keepAspect);
+        aspectLockBtn.setAttribute("aria-pressed", state.keepAspect ? "true" : "false");
+        aspectLockBtn.textContent = state.keepAspect ? "🔗 نسبت ثابت" : "🔓 نسبت آزاد";
+        if (state.keepAspect && state.cropH) {
+          state.aspectRatio = state.cropW / state.cropH;
+          applyCropSize("width");
+        }
+      });
+
+      saveBtn.addEventListener("click", saveCrop);
+      resetBtn.addEventListener("click", resetAll);
+
+      dropzone.addEventListener("click", function () {
+        fileInput.click();
+      });
+      dropzone.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          fileInput.click();
+        }
+      });
+      fileInput.addEventListener("change", function () {
+        if (fileInput.files && fileInput.files[0]) loadFile(fileInput.files[0]);
+      });
+
+      dropzone.addEventListener("dragenter", function (e) {
+        e.preventDefault();
+        dropzone.classList.add("dragover");
+      });
+      dropzone.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        dropzone.classList.add("dragover");
+      });
+      dropzone.addEventListener("dragleave", function (e) {
+        e.preventDefault();
+        if (!dropzone.contains(e.relatedTarget)) dropzone.classList.remove("dragover");
+      });
+      dropzone.addEventListener("drop", function (e) {
+        e.preventDefault();
+        dropzone.classList.remove("dragover");
+        var files = e.dataTransfer && e.dataTransfer.files;
+        if (files && files[0]) loadFile(files[0]);
+      });
+
+      window.addEventListener("resize", function () {
+        if (state.naturalW) updateBoxUI();
+      });
+    })();
+  </script>
+</body>
+
+</html>
